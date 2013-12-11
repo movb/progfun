@@ -26,7 +26,7 @@ object Anagrams {
   /** The dictionary is simply a sequence of words.
    *  It is predefined and obtained as a sequence using the utility method `loadDictionary`.
    */
-  val dictionary: List[Word] = loadDictionary
+  val dictionary: List[Word] = loadDictionary map (_.toLowerCase())
 
   /** Converts the word into its character occurence list.
    *  
@@ -83,7 +83,8 @@ object Anagrams {
   def combinations(occurrences: Occurrences): List[Occurrences] = {
     (
 	    occurrences match {
-	    	case Nil => List()
+	    	case Nil => List(List())
+	    	//case os::Nil => List(List(os))
 	    	case (ch,occ)::os =>
 		    	for { x <- (0 to occ)
 		    		  ls <- combinations(os)}
@@ -149,11 +150,11 @@ object Anagrams {
    *  Note: There is only one anagram of an empty sentence.
    */
   def sentenceAnagrams(sentence: Sentence): List[Sentence] = {
-    def occurrencesAnagrams(occurrences: Occurrences): List[Sentence] = { 
-	    for{ occ <- combinations(occurrences) if (dictionaryByOccurrences.contains(occ))
-	    	 w <- dictionaryByOccurrences(occ)
+    def occurrencesAnagrams(occurrences: Occurrences): List[Sentence] = {
+	    for{ occ <- combinations(occurrences).filter(dictionaryByOccurrences.contains(_))
+	    	 w <- dictionaryByOccurrences.apply(occ)  
 	    	 lst <- occurrencesAnagrams(subtract(occurrences, occ))
-	    } yield w :: lst
+	    } yield w :: lst 
     }
     
     occurrencesAnagrams(sentenceOccurrences(sentence))
